@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 Load locally saved CSV data file to be used in following tasks. The data file contains environmental conditions in New York City. Data is courtesy of [vincentarelbundock](http://vincentarelbundock.github.io/Rdatasets/).
 
 ```{r}
-nyc.environment <- read.table (file = "environmental.csv", header = TRUE, sep = ",")
+nyc.environment <- read.table(file = "environmental.csv", header = TRUE, sep = ",")
 ```
 
 ## Task 1
@@ -114,7 +114,7 @@ __Comparison:__ Mean and median values between a full data set and a subset are 
 
 For at least 3 values in a column please rename so that every value in that column is renamed. For example, suppose I have 20 values of the letter "e" in one column. Rename those values so that all 20 would show as "excellent."
 
-_Please note that my data only had numeric values, which were not well suited for this task. I have decided to add a character column based on my data to do replace operations. The solution may include more than was requested, but it was great practice for me._
+_Please note that my data only had numeric values, which were not well suited for this task. I have decided to add a character column based on my data to do these data manipulations. The solution may include more than was requested, but it was great practice for me._
 
 ```{r}
 # Add a column to hold Beaufort wind force scale with possible values applicable to the data set
@@ -157,3 +157,19 @@ nyc.environment[1:15, ]
 ## Task 7 (Bonus)
 
 Place the original .csv in a github file and have R read from the link.
+
+```{r}
+require(RCurl)
+
+# Load data file from GitHub
+git.nyc.environment <- read.csv(text=getURL("https://raw.githubusercontent.com/ilyakats/CUNY-R-Bridge-Workshop/master/git-environmental.csv"), header = TRUE, sep = ",")
+
+# Quick data check
+head(git.nyc.environment)
+```
+
+## Cleanup
+
+```{r}
+rm(nyc.environment, git.nyc.environment, df.nyc, df.stats)
+```

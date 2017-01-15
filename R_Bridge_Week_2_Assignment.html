@@ -127,7 +127,7 @@ $(document).ready(function () {
 <div id="setup" class="section level2">
 <h2>Setup</h2>
 <p>Load locally saved CSV data file to be used in following tasks. The data file contains environmental conditions in New York City. Data is courtesy of <a href="http://vincentarelbundock.github.io/Rdatasets/">vincentarelbundock</a>.</p>
-<pre class="r"><code>nyc.environment &lt;- read.table (file = &quot;environmental.csv&quot;, header = TRUE, sep = &quot;,&quot;)</code></pre>
+<pre class="r"><code>nyc.environment &lt;- read.table(file = &quot;environmental.csv&quot;, header = TRUE, sep = &quot;,&quot;)</code></pre>
 </div>
 <div id="task-1" class="section level2">
 <h2>Task 1</h2>
@@ -184,16 +184,16 @@ df.nyc &lt;- df.nyc[order(df.nyc$orig.row), ]
 row.names(df.nyc) &lt;- 1:10
 df.nyc</code></pre>
 <pre><code>##    orig.row rad temp
-## 1         7  19   61
-## 2        14  78   57
-## 3        29 191   77
-## 4        39 276   88
-## 5        45  48   80
-## 6        52 294   86
-## 7        65 207   90
-## 8        85 183   93
-## 9        99 224   67
-## 10      102 201   82</code></pre>
+## 1        10 274   68
+## 2        11  65   58
+## 3        35 248   85
+## 4        51   7   74
+## 5        53 223   85
+## 6        57 275   86
+## 7        61  24   81
+## 8        64 229   90
+## 9        80 225   94
+## 10       98 237   78</code></pre>
 </div>
 <div id="task-3" class="section level2">
 <h2>Task 3</h2>
@@ -202,16 +202,16 @@ df.nyc</code></pre>
 <pre class="r"><code>df.nyc &lt;- setNames(df.nyc, c(&quot;OriginalRow&quot;,&quot;Radiation&quot;,&quot;Temperature&quot;))
 df.nyc</code></pre>
 <pre><code>##    OriginalRow Radiation Temperature
-## 1            7        19          61
-## 2           14        78          57
-## 3           29       191          77
-## 4           39       276          88
-## 5           45        48          80
-## 6           52       294          86
-## 7           65       207          90
-## 8           85       183          93
-## 9           99       224          67
-## 10         102       201          82</code></pre>
+## 1           10       274          68
+## 2           11        65          58
+## 3           35       248          85
+## 4           51         7          74
+## 5           53       223          85
+## 6           57       275          86
+## 7           61        24          81
+## 8           64       229          90
+## 9           80       225          94
+## 10          98       237          78</code></pre>
 </div>
 <div id="task-4" class="section level2">
 <h2>Task 4</h2>
@@ -219,27 +219,27 @@ df.nyc</code></pre>
 <div id="summary-1" class="section level4">
 <h4>Summary</h4>
 <pre class="r"><code>summary(df.nyc)</code></pre>
-<pre><code>##   OriginalRow      Radiation      Temperature  
-##  Min.   :  7.0   Min.   : 19.0   Min.   :57.0  
-##  1st Qu.: 31.5   1st Qu.:104.2   1st Qu.:69.5  
-##  Median : 48.5   Median :196.0   Median :81.0  
-##  Mean   : 53.7   Mean   :172.1   Mean   :78.1  
-##  3rd Qu.: 80.0   3rd Qu.:219.8   3rd Qu.:87.5  
-##  Max.   :102.0   Max.   :294.0   Max.   :93.0</code></pre>
+<pre><code>##   OriginalRow      Radiation      Temperature   
+##  Min.   :10.00   Min.   :  7.0   Min.   :58.00  
+##  1st Qu.:39.00   1st Qu.:104.5   1st Qu.:75.00  
+##  Median :55.00   Median :227.0   Median :83.00  
+##  Mean   :52.00   Mean   :180.7   Mean   :79.90  
+##  3rd Qu.:63.25   3rd Qu.:245.2   3rd Qu.:85.75  
+##  Max.   :98.00   Max.   :275.0   Max.   :94.00</code></pre>
 </div>
 <div id="mean-and-median-of-temperature-1" class="section level4">
 <h4>Mean and median of temperature</h4>
 <pre class="r"><code>mean(df.nyc$Temperature)</code></pre>
-<pre><code>## [1] 78.1</code></pre>
+<pre><code>## [1] 79.9</code></pre>
 <pre class="r"><code>median(df.nyc$Temperature)</code></pre>
-<pre><code>## [1] 81</code></pre>
+<pre><code>## [1] 83</code></pre>
 </div>
 <div id="mean-and-median-of-radiation-1" class="section level4">
 <h4>Mean and median of radiation</h4>
 <pre class="r"><code>mean(df.nyc$Radiation)</code></pre>
-<pre><code>## [1] 172.1</code></pre>
+<pre><code>## [1] 180.7</code></pre>
 <pre class="r"><code>median(df.nyc$Radiation)</code></pre>
-<pre><code>## [1] 196</code></pre>
+<pre><code>## [1] 227</code></pre>
 </div>
 <div id="save-new-values-for-comparison" class="section level4">
 <h4>Save new values for comparison</h4>
@@ -253,15 +253,15 @@ df.stats</code></pre>
 <pre><code>##                   Mean Median
 ## FullSet-Temp  77.79279     79
 ## FullSet-Rad  184.80180    207
-## SubSet-Temp   78.10000     81
-## SubSet-Rad   172.10000    196</code></pre>
+## SubSet-Temp   79.90000     83
+## SubSet-Rad   180.70000    227</code></pre>
 <p><strong>Comparison:</strong> Mean and median values between a full data set and a subset are obviously different, but since a subset represents a random sample, they should be relatively close. Of course, since the sample is small there may be exceptions to this. Also, I was slightly unsure whether you want descriptive comparison or an actual <em>if…then</em> comparison with a printout. As you see, I went with descriptive a comparison/analysis.</p>
 </div>
 </div>
 <div id="task-5" class="section level2">
 <h2>Task 5</h2>
 <p>For at least 3 values in a column please rename so that every value in that column is renamed. For example, suppose I have 20 values of the letter “e” in one column. Rename those values so that all 20 would show as “excellent.”</p>
-<p><em>Please note that my data only had numeric values, which were not well suited for this task. I have decided to add a character column based on my data to do replace operations. The solution may include more than was requested, but it was great practice for me.</em></p>
+<p><em>Please note that my data only had numeric values, which were not well suited for this task. I have decided to add a character column based on my data to do these data manipulations. The solution may include more than was requested, but it was great practice for me.</em></p>
 <pre class="r"><code># Add a column to hold Beaufort wind force scale with possible values applicable to the data set
 nyc.environment &lt;- cbind(nyc.environment, beaufort = factor(NA, levels = c(&quot;la&quot;, &quot;lb&quot;, &quot;gb&quot;, &quot;mb&quot;, &quot;fb&quot;)))
 
@@ -317,8 +317,27 @@ nyc.environment[,&quot;beaufort&quot;] &lt;- as.factor(v.beaufort)</code></pre>
 ## 15 15    30       322          68 11.5   gentle breeze</code></pre>
 </div>
 <div id="task-7-bonus" class="section level2">
-<h2>Task 7 (BONUS)</h2>
+<h2>Task 7 (Bonus)</h2>
 <p>Place the original .csv in a github file and have R read from the link.</p>
+<pre class="r"><code>require(RCurl)</code></pre>
+<pre><code>## Loading required package: RCurl</code></pre>
+<pre><code>## Loading required package: bitops</code></pre>
+<pre class="r"><code># Load data file from GitHub
+git.nyc.environment &lt;- read.csv(text=getURL(&quot;https://raw.githubusercontent.com/ilyakats/CUNY-R-Bridge-Workshop/master/git-environmental.csv&quot;), header = TRUE, sep = &quot;,&quot;)
+
+# Quick data check
+head(git.nyc.environment)</code></pre>
+<pre><code>##   X ozone radiation temperature wind
+## 1 1    41       190          67  7.4
+## 2 2    36       118          72  8.0
+## 3 3    12       149          74 12.6
+## 4 4    18       313          62 11.5
+## 5 5    23       299          65  8.6
+## 6 6    19        99          59 13.8</code></pre>
+</div>
+<div id="cleanup" class="section level2">
+<h2>Cleanup</h2>
+<pre class="r"><code>rm(nyc.environment, git.nyc.environment, df.nyc, df.stats)</code></pre>
 </div>
 
 
