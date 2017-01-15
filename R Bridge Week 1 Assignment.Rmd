@@ -1,0 +1,112 @@
+---
+title: "CUNY MSDA R Bridge - Week 1 Assignment"
+author: "Ilya Kats"
+date: "January 7, 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercise 1
+
+Write a loop that calculates 12-factorial.
+
+_Note: Although the problem asks specifically only for the value of 12-factorial, I've decided to write a slightly more generic loop in a function to pratice my R skills._
+
+```{r}
+get_factorial <- function(n = 0) {
+  # Ideally the code to confirm that n is an integer would go here.
+  # Since it is not directly requested by the problem, assuming n is integer. 
+  
+  # Check that n is non-negative
+  if (n < 0) return(-1)
+  
+  # Return 1 if n is zero
+  if (n == 0) return(1)
+  
+  # Loop to calculate factorial
+  my_factorial <- 1
+  for (i in 1:n) {
+    my_factorial <- my_factorial * i
+  }
+  return(my_factorial)
+}
+
+get_factorial(12)
+```
+
+## Exercise 2
+
+Show how to create a numeric vector that contains the sequence from 20 to 50 by 5.
+
+```{r}
+five_vector <- c(seq.int(20, 50, by = 5))
+
+five_vector
+```
+
+_Note: I believe __c()__ is unnecessary, but I do not have a feel for how explicit does one need to be in R yet._
+
+## Exercise 3
+
+Create the function "factorial" that takes a trio of input numbers a, b, and c and solve the quadratic
+equation. The function should print as output the two solutions.
+
+Quadratic equation: $ax^2 + bx + c = 0$
+
+Solution: $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
+
+```{r}
+quadratic <- function(a, b, c) {
+  # Check that the equation is quadratic.
+  if (a == 0) {
+    return("Equation is not quadratic")
+  }
+  
+  delta <- (b^2 - 4 * a * c)
+  if (delta > 0) {
+    # Two real solutions
+    solution1 <- (-b + sqrt(delta)) / (2 * a)
+    solution2 <- (-b - sqrt(delta)) / (2 * a)
+    return(sprintf("Equation has two real solutions: %s and %s", solution1, solution2))
+  } else if (delta == 0) {
+    # One real solution
+    solution1 <- -b / (2 * a)
+    return(sprintf("Equation has only one solution: %s", solution1))
+  } else {
+    # Two complex solutions
+    solution1 <- complex(real = -b / (2 * a), imaginary = sqrt(-delta) / (2 * a))
+    solution2 <- complex(real = -b / (2 * a), imaginary = - sqrt(-delta) / (2 * a))
+    return(sprintf("Equation has two complex solutions: %s and %s", solution1, solution2))
+  }
+}
+```
+
+#### Example 1:
+```{r}
+quadratic(1, -1, -2)
+```
+
+#### Example 2:
+```{r}
+quadratic(1, 2, 1)
+```
+
+#### Example 3:
+```{r}
+quadratic(0, 1, 1)
+```
+
+#### Example 4:
+```{r}
+quadratic(5, 7, -11)
+```
+
+#### Example 5:
+```{r}
+quadratic(1, 2, 2)
+```
