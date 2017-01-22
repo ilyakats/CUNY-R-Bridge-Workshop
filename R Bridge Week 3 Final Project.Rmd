@@ -13,15 +13,135 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Select a data set and analyze. The presentation approach is up to you, but it should contain the following:
 
-1. __Data Exploration:__ This should include summary statistics, means, medians, quartiles, or any other relevant information about the data set. Please include some conclusions in the R Markdown text.
-2. __Data Wrangling:__ Please perform some basic transformations. They will need to make sense but could include column renaming, creating a subset of the data, replacing values, or creating new columns with derived data (for example, if it makes sense you could sum two columns together).
-3. __Graphics:__ Please make sure to display at least one scatter plot, box plot and histogram. Don't be limited to this. Please explore the many other options in R packages such as ggplot2.
-4. __Meaningful Question for Analysis:__ Please state at the beginning a meaningful question for analysis. Use the first three steps and anything else that would be helpful to answer the question you are posing from the data set you chose. Please write a brief conclusion paragraph in R markdown at the end.
+1. **Data Exploration:** This should include summary statistics, means, medians, quartiles, or any other relevant information about the data set. Please include some conclusions in the R Markdown text.
+2. **Data Wrangling:** Please perform some basic transformations. They will need to make sense but could include column renaming, creating a subset of the data, replacing values, or creating new columns with derived data (for example, if it makes sense you could sum two columns together).
+3. **Graphics:** Please make sure to display at least one scatter plot, box plot and histogram. Don't be limited to this. Please explore the many other options in R packages such as ggplot2.
+4. **Meaningful Question for Analysis:** Please state at the beginning a meaningful question for analysis. Use the first three steps and anything else that would be helpful to answer the question you are posing from the data set you chose. Please write a brief conclusion paragraph in R markdown at the end.
 
 ## Setup
 
-Load locally saved CSV data file to be used in following tasks. The data file contains environmental conditions in New York City. Data is courtesy of [vincentarelbundock](http://vincentarelbundock.github.io/Rdatasets/).
+The data set contains a list of 2,410 US craft beers and 510 US breweries. The data was collected in January 2017 on CraftCans.com. Data is courtesy of [Jean-Nicholas Hould at Kaggle.com](https://www.kaggle.com/nickhould/craft-cans/). The data set deals only with canned craft beer - a growing craft beer segment, so any further mentions of beer implies only canned beer. 
+
+```{r message=FALSE}
+# Load packages
+library(RCurl)
+library(psych)
+library(ggplot2)
+library(reshape2)
+
+# Load data file from GitHub
+beers <- read.csv(text=getURL("https://raw.githubusercontent.com/ilyakats/CUNY-R-Bridge-Workshop/master/beers.csv"), header = TRUE, sep = ",")
+breweries <- read.csv(text=getURL("https://raw.githubusercontent.com/ilyakats/CUNY-R-Bridge-Workshop/master/breweries.csv"), header = TRUE, sep = ",")
+
+# Rename X column in the Breweries data set to match Beers data set for easier merging
+colnames(breweries)[1] <- "brewery_id"
+
+# Trim whitespaces
+breweries$state <- trimws(breweries$state)
+breweries$name <- trimws(breweries$name)
+beers$style <- trimws(beers$style)
+```
+
+## Analysis
+
+Initial data review/summary - means, median, min/max, a few rows of data...
 
 ```{r}
-nyc.environment <- read.table(file = "environmental.csv", header = TRUE, sep = ",")
+describe(beers)
+head(beers)
+
+head(breweries)
 ```
+
+I would like to look into IBU values. IBU stands for **I**nternational **B**itterness **U**nit and is used to qualify the bitterness of beer. The higher the number the more bitter the beer. 
+
+```{r}
+boxplot(beers$ibu)
+```
+
+IBU values over 100 are somewhat useless since they cannot be perceived by a drinker. The chart shows that half of beers with listed IBU values have IBU between  `r quantile(beers$ibu, na.rm = TRUE)["25%"]` and `r quantile(beers$ibu, na.rm = TRUE)["75%"]`. A very usable range. There are of course a few outliers above `r quantile(beers$ibu, na.rm = TRUE)["75%"] + (1.5 * IQR(beers$ibu, na.rm = TRUE))` (upper fence). Great marketing tool, but hardly usable.
+
+Check out histogram as well...
+
+```{r}
+ggplot(beers) + geom_histogram(aes(x = ibu), binwidth = 5, na.rm = TRUE)
+```
+
+Get a list of 20 most bitter styles (including average ABV for those styles)... 
+
+```{r}
+style.ibu <- aggregate(cbind(ibu, abv) ~ style, beers, mean)
+style.ibu <- style.ibu[order(-style.ibu$ibu), ]
+
+style.ibu[1:20, ]
+```
+
+Graph scatterplot of bitterness (IBU) and strength (ABV)...
+
+```{r}
+ggplot(beers, aes(x = ibu, y = abv)) + geom_point(na.rm=TRUE)+geom_smooth(method=lm,se=FALSE, na.rm=TRUE)
+```
+
+The scatterplot is fairly spread out. There is weak, if any, dependency between two variables.
+
+I would also like to consider the state the beer is brewed in and see if any states favor more bitter beer in comparison to other states. Merge *beers* and *breweries* data sets and display histogram by state. 
+
+```{r}
+loc.beers <- merge(beers, breweries, by = "brewery_id")
+names(loc.beers)[names(loc.beers) == "name.x"] <- "beer_name"
+names(loc.beers)[names(loc.beers) == "name.y"] <- "brewery_name"
+ggplot(loc.beers, aes(x = ibu)) + geom_histogram(binwidth = 5, na.rm=TRUE) + facet_wrap(~state)
+```
+
+A few interesting findings based on the state histograms:
+
+* There is a bit of an anomaly in Colorado with a spike of bitter beers not seen in other states. 
+* Surprisingly to me, there is a healthy craft beer scene in Texas. Less surprisingly beers in Texas tend to be less bitter than in other states with similar number of craft beers. This can be explained by either geographical location (warmer climate) or more likely by younger craft beer scene since drinkers not used to craft beer are generally turned off by bitter beers.
+* Again, a bit unexpected, but clearly shown - no craft beers in South Dakota. Very few beers in New Hampshire and New Jersey.
+
+I think it is worthwhile to look into two states with large number of beers and spikes on both sides of bitterness - Colorado and Indiana. Prepare a subset for each state.
+
+```{r}
+# Subsets for Colorado and Indiana beers
+co.beers <- loc.beers[loc.beers$state == "CO", ]
+in.beers <- loc.beers[loc.beers$state == "IN", ]
+
+# Counts of beers for each style
+co.sums <- as.data.frame(table(co.beers$style))
+in.sums <- as.data.frame(table(in.beers$style))
+
+# Merge style counts for both states, adjust column names and set NAs to 0
+stl.cnt <- merge(co.sums[co.sums$Freq > 4, ], in.sums[in.sums$Freq > 4, ], by = "Var1", all = TRUE)
+colnames(stl.cnt) <- c("style", "CO.count", "IN.count")
+stl.cnt[is.na(stl.cnt)] <- 0
+
+# Melt the data for plotting
+stl.cnt.m <- melt(stl.cnt, id.vars='style')
+
+levels(stl.cnt.m$variable)[levels(stl.cnt.m$variable) == "CO.count"] <- "Colorado"
+levels(stl.cnt.m$variable)[levels(stl.cnt.m$variable) == "IN.count"] <- "Indiana"
+
+ggplot(stl.cnt.m, aes(style, value, fill = variable)) +   
+  geom_bar(position = "dodge", stat="identity") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.title=element_blank()) +
+  ggtitle("Number of Beers per Style (for Styles with at Least 5 Beers in CO or IN)") +
+  labs(x = "Beer Style", y = "Number of Beers")
+```
+
+Although it may appear that the American Pale Ale (APA) category has a significant discrepancy between two states, the average IBU for APAs is 44.9. More significant are discrepancies in IPAs (average IBU is 67.6) and Imperial IPAs (average IBU is 93.3). I want to see what breweries release these styles.
+
+```{r}
+co.ipas <- as.data.frame(table(co.beers[co.beers$style == "American IPA" | co.beers$style == "American Double / Imperial IPA", ]$brewery_name))
+colnames(co.ipas) <- c("Brewery", "No of IPAs")
+co.ipas[order(-co.ipas[,2]), ]
+
+in.ipas <- as.data.frame(table(in.beers[in.beers$style == "American IPA" | in.beers$style == "American Double / Imperial IPA", ]$brewery_name))
+colnames(in.ipas) <- c("Brewery", "No of IPAs")
+in.ipas[order(-in.ipas[,2]), ]
+```
+
+I wanted to see if a single brewery in Colorado with a tendency to release strong, bitter beers is responsible for a spike in bitter beer across the state. Colorado brewers produce `r sum(co.ipas[, 2])` IPAs or Double IPAs (DIPAs). Indiana brewers produce `r sum(in.ipas[, 2])` such beers. Oskar Blues in Colorado is responsible for a significant portion of bitter bitters, but I don't think it is enough. There is a significant number of Colorado breweries which release at least one bitter beer and I can only conlude that Colorado enjoys a bitter beer more than other states. As an interesting side note, Oskar Blues was the first craft brewery to can their beer back in 2002. They have never released any beers in bottles.
+
+## Conlusion
+
+I have looked into the numbers related to canned craft beers in the United States. Specifically, I concentrated on bitterness of these beers. Even further I concentrated on bitter beers of Colorado. After this brief, initial analysis it does appear that Colorado has a taste for bitter beers. Of course, the set only covers canned beers. Although canning is on the rise, majority of craft beer is still bottled. It is possible that the "pioneers" of the craft beer world tend to brew beer bitter AND can their products. Further analysis using all craft beer data should be performed. Since craft brewing is a hobby of mine, it was interesting to see that Colorado has a disproportional number of bitter beers since traditionally California is considered purveyor of hoppy beers. 
